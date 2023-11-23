@@ -22,8 +22,17 @@ class MyApp:
         self.state_var = tk.StringVar()
         self.state_combobox = ttk.Combobox(root, textvariable=self.state_var, values=self.get_state_list())
         self.state_combobox.set("Select State")
+
         #Create a button to submit the form
         self.submit_button = ttk.Button(root, text="Submit", command=self.submit_form)
+
+        #Create Treeview for displaying data in a dashboard
+        self.tree = ttk.Treeview(root, columns=("ID", "Name", "Age", "Company", "State"), show="headings", height=5)
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Name", text="Name")
+        self.tree.heading("Age", text="Age")
+        self.tree.heading("Company", text="Company")
+        self.tree.heading("State", text="State")
 
         #Setup the layout using the grid geometry manager
         self.label_name.grid(row=0, column=0, padx=10, pady=5, sticky="E")
@@ -39,6 +48,12 @@ class MyApp:
         self.state_combobox.grid(row=3, column=1, padx=10, pady=5)
 
         self.submit_button.grid(row=4, column=0, columnspan=2, pady=10)
+
+        #Placing Treeview widget in layout
+        self.tree.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
+
+        #Populate the Treeview with data from the database
+        self.populate_treeview()
 
     def get_state_list(self):
         return [
@@ -125,6 +140,22 @@ class MyApp:
         #Create an "Ok" button to close the window
         ok_button = ttk.Button(message_window, text="OK", command=message_window.destroy)
         ok_button.pack(pady=10)
+    
+    def populate_treeview(self):
+        #Clear existing items in the Treeview
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        #Fetch data from the database and insert into the treeview
+        connection = sqlite3.connect("data.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM users")
+        data = cursor.fetchall()
+        connection.close()
+
+        for row in data:
+            self.tree.insert("", "end", values=row)
+            
 
 if __name__=="__main__":
     root = tk.Tk()
