@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import sqlite3
 
 class MyApp:
@@ -21,7 +21,7 @@ class MyApp:
         self.label_state = ttk.Label(root, text="State")
         self.state_var = tk.StringVar()
         self.state_combobox = ttk.Combobox(root, textvariable=self.state_var, values=self.get_state_list())
-
+        self.state_combobox.set("Select State")
         #Create a button to submit the form
         self.submit_button = ttk.Button(root, text="Submit", command=self.submit_form)
 
@@ -63,8 +63,8 @@ class MyApp:
         selected_state = self.state_var.get()
 
         #Check if any of the fields are empty
-        if not name or not age or not company or not selected_state == "Select State":
-            messagebox.showerror("Error", "Please fill in all fields.")
+        if not name.strip() or not age.strip() or not company.strip() or selected_state.strip() == "Select State":
+            self.show_message("Error", "Please fill in all fields.")
             return
         
         try:
@@ -72,14 +72,14 @@ class MyApp:
             self.update_database(name, age, company, selected_state)
 
             #Display success message
-            messagebox.showinfo("Success", "Submission Complete!")
+            self.show_message("Success", "Submission Complete!")
 
             #Clear form
-            self.clear.form()
+            self.clear_form()
 
         except Exception as e:
             #Display error message
-            messagebox.showerror("Error", f"An error occured: {str(e)}")
+            self.show_message("Error", f"An error occured: {str(e)}")
 
     #Update the datebase    
     def update_database(self, name, age, company, selected_state):
@@ -105,6 +105,26 @@ class MyApp:
         # Commit the changes and close the connection
         connection.commit()
         connection.close()
+    
+    def clear_form(self):
+        #Clear entry widgets
+        self.entry_name.delete(0, tk.END)
+        self.entry_age.delete(0, tk.END)
+        self.entry_company.delete(0, tk.END)
+        self.state_combobox.set("Select State")
+
+    def show_message(self, title, message):
+        #Create a new top-level window for displaying messages
+        message_window = tk.Toplevel(self.root)
+        message_window.title(title)
+
+        #Create a label to display the message
+        label = ttk.Label(message_window, text=message)
+        label.pack(padx=20, pady=20)
+
+        #Create an "Ok" button to close the window
+        ok_button = ttk.Button(message_window, text="OK", command=message_window.destroy)
+        ok_button.pack(pady=10)
 
 if __name__=="__main__":
     root = tk.Tk()
