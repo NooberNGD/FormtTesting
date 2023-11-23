@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sqlite3
 
 class MyApp:
@@ -62,12 +62,26 @@ class MyApp:
         company = self.entry_company.get()
         selected_state = self.state_var.get()
 
-        # Update the database 
-        self.update_database(name, age, company, selected_state)
+        #Check if any of the fields are empty
+        if not name or not age or not company or not selected_state == "Select State":
+            messagebox.showerror("Error", "Please fill in all fields.")
+            return
         
-        # #Testing UI, 
-        # print(f"Name: {name}, Age: {age}, Company:{company}, State: {selected_state}")
+        try:
+            #Update the database
+            self.update_database(name, age, company, selected_state)
 
+            #Display success message
+            messagebox.showinfo("Success", "Submission Complete!")
+
+            #Clear form
+            self.clear.form()
+
+        except Exception as e:
+            #Display error message
+            messagebox.showerror("Error", f"An error occured: {str(e)}")
+
+    #Update the datebase    
     def update_database(self, name, age, company, selected_state):
         #Connect to the SQLite database (or create if not exist)
         connection = sqlite3.connect("data.db")
